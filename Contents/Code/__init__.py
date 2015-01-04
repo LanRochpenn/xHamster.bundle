@@ -3,15 +3,18 @@ TITLE = 'xHamster'
 BASE_URL = 'http://xhamster.com'
 CHANNEL_LIST = 'http://xhamster.com/channels.php'
 CTYPES = ['Straight Categories','Transsexual Categories','Gay Categories']
+ICON='icon-default.png'
 
 ##########################################################################################
 def Start():
 	ObjectContainer.title1 = TITLE
 	HTTP.Headers['User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:23.0) Gecko/20100101 Firefox/23.0'
-	HTTP.CacheTime = 0
+	HTTP.CacheTime = CACHE_1HOUR
+	DirectoryObject.thumb = ICON
+	VideoClipObject.thumb = ICON
 
 ##########################################################################################
-@handler(PREFIX, TITLE, thumb='icon-default.png')
+@handler(PREFIX, TITLE, thumb=ICON)
 def MainMenu():
 	oc = ObjectContainer()
 	
