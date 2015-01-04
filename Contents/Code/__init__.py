@@ -105,7 +105,7 @@ def ChannelOptions(pURL,pTitle):
 
 	oc.add(DirectoryObject(key = Callback(ParseVideos, pURL='/channels/new-'+channel+'-1.html', pTitle=String.Quote(pTitle + " - Latest Videos (All)")), title = "Latest Videos (All)"))
 	# only show this option if it's not HD videos
-	if not channel=="hd_video":
+	if not channel=="hd_videos":
 		oc.add(DirectoryObject(key = Callback(ParseVideos, pURL='/channels/hd-'+channel+'-1.html', pTitle=String.Quote(pTitle + " - Latest Videos (All)")), title = "Latest Videos (HD Only)"))
 	oc.add(DirectoryObject(key = Callback(ParseVideos, pURL='/channels/top-weekly-'+channel+'-1.html', pTitle=String.Quote(pTitle + " - Latest Videos (All)")), title = "Top Videos - Last 7 Days"))
 	oc.add(DirectoryObject(key = Callback(ParseVideos, pURL='/channels/top-monthly-'+channel+'-1.html', pTitle=String.Quote(pTitle + " - Latest Videos (All)")), title = "Top Videos - Last 30 Days"))
