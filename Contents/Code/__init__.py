@@ -9,9 +9,10 @@ ICON='icon-default.png'
 def Start():
 	ObjectContainer.title1 = TITLE
 	HTTP.Headers['User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:23.0) Gecko/20100101 Firefox/23.0'
-	HTTP.CacheTime = CACHE_1HOUR
-	DirectoryObject.thumb = ICON
-	VideoClipObject.thumb = ICON
+	HTTP.CacheTime = 2
+	DirectoryObject.thumb = R(ICON)
+	InputDirectoryObject.thumb = R(ICON)
+	VideoClipObject.thumb = R(ICON)
 
 ##########################################################################################
 @handler(PREFIX, TITLE, thumb=ICON)
@@ -26,6 +27,7 @@ def MainMenu():
 	oc.add(DirectoryObject(key = Callback(ParseVideos, pURL='/rankings/weekly-top-viewed.html', pTitle=String.Quote("Most Viewed Videos - Last 7 days")), title = "Most Viewed Videos - Last 7 days"))
 	oc.add(DirectoryObject(key = Callback(ParseVideos, pURL='/rankings/monthly-top-viewed.html', pTitle=String.Quote("Most Viewed Videos - Last 30 days")), title = "Most Viewed Videos - Last 30 days"))
 	oc.add(DirectoryObject(key = Callback(ParseVideos, pURL='/rankings/alltime-top-viewed.html', pTitle=String.Quote("Most Viewed Videos - All Time")), title = "Most Viewed Videos - All Time"))
+	oc.add(InputDirectoryObject(key = Callback(Search), title = 'Search Videos', prompt = 'Search Videos'))	
 
 	
 	return oc
@@ -42,20 +44,45 @@ def GetNewContent():
 def ParseVideos(pURL,pTitle):
 	oc = ObjectContainer(title2=pTitle)
 	
-	# Fugly hack - the framework doesn't seem to handle decoding a colon properly ( : )
+	# Fugly hack - we can end up with three kinds of URLs here
+	# http://xhamster.com/blah.html OR /blah.html OR blah.html 
+	# so deal with that accordingly, also
+	# the framework doesn't seem to handle decoding a colon properly ( : )
 	# so let's just rip them out and put them back as required be forcing all URLs to be relative
 	# and manually putting back the full path each time
+
+	# force an Unquote to be safe
+	pURL = String.Unquote(pURL)
+
+	# not a full pathed relative url?  i.e. search.php?q=test .. make it so, i.e. /search.php?q=test
+	if not pURL.startswith('http') and not pURL.startswith('/'):
+		pURL = '/' + pURL
+	
+	# not an absolute url?  If so make it one
 	if not pURL.startswith('http'):
 		pURL = BASE_URL + pURL
 	else:
+		# this was a passed absolute url, likely with a broken : so split and recreate with the proper base
 		pURL = BASE_URL + pURL.split("xhamster.com")[-1]
 
-	for video in HTML.ElementFromURL(pURL).xpath('//div[@class="video"]'):
-		title = video.xpath('.//u/text()')[0]
-		url = video.xpath('.//a/@href')[0]
-		thumb = video.xpath('.//img/@src')[0]
-		oc.add(VideoClipObject(url=url,title=title,thumb=thumb))
+	try:
+		for video in HTML.ElementFromURL(pURL).xpath('//div[@class="video"]'):
+			title = video.xpath('.//u/@title')[0]
+			url = video.xpath('.//a/@href')[0]
+			thumb = video.xpath('.//img/@src')[0]
+			# no clients display this in regular listings any longer
+			#rating = float(video.xpath('.//div[@class="fr"]/text()')[0].strip('%'))/10
 
+			try:
+				duration = Datetime.MillisecondsFromString(video.xpath('.//b/text()')[0])
+			except:
+				duration = 0
+
+			oc.add(VideoClipObject(url=url,title=title,duration=duration,thumb=thumb))
+	except:
+		# nothing was found
+		NoResults=""
+		
 	# next page object?
  	try:
 		nextURL = HTML.ElementFromURL(pURL).xpath("//div[contains(@class,'pager')]//a[contains(@class,'last')]/@href")[0]
@@ -74,8 +101,6 @@ def GetChannels(c):
 	for channel in HTML.ElementFromURL(CHANNEL_LIST).xpath("//div[contains(@class,'boxC')]//div[contains(@class,'list')][%s]//a[@class='btnBig']" % (c + 1)):
 		url = channel.xpath("./@href")[0]
 		title = channel.xpath("./text()")[-1].strip()
- 		Log.Debug("title: " + title)
- 		Log.Debug("url: " + url)
 		oc.add(DirectoryObject(key = Callback(ChannelOptions, pURL=String.Quote(url), pTitle=String.Quote(title)), title=title))
 		
 	oc.objects.sort(key = lambda obj: obj.title, reverse=False)		
@@ -101,10 +126,8 @@ def ChannelOptions(pURL,pTitle):
 	# strip to relative URL only
 	pURL = pURL.split("xhamster.com")[-1]
 
-	# get channel name .. i.e. new-chanellname-1.html becomes channelname
+	# get channel name .. i.e. new-chanelname-1.html becomes channelname
 	channel=pURL.split("-")[1]
-
-	Log.Debug("Channel: "+channel)
 
 	oc.add(DirectoryObject(key = Callback(ParseVideos, pURL='/channels/new-'+channel+'-1.html', pTitle=String.Quote(pTitle + " - Latest Videos (All)")), title = "Latest Videos (All)"))
 	# only show this option if it's not HD videos
@@ -116,9 +139,12 @@ def ChannelOptions(pURL,pTitle):
 
 	return oc
 
-
-
-
+@route(PREFIX + '/Search')
+####################################################################################################
+# We add a default query string purely so that it is easier to be tested by the automated channel tester
+def Search(query="test"):
+	search=String.Quote(query, usePlus=True)
+	return ParseVideos(pURL="/search.php?new=&q=%s&qcat=video" % search, pTitle="Search xHamster")
 
 
 
