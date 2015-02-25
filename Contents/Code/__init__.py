@@ -21,6 +21,7 @@ def MainMenu():
 	
 	oc.add(DirectoryObject(key = Callback(GetNewContent), title="Newest Videos"))
 	oc.add(DirectoryObject(key = Callback(ChannelTypes), title="Categories"))
+	oc.add(DirectoryObject(key = Callback(ParseVideos, pURL='/rankings/daily-top-videos.html', pTitle=String.Quote("Top Videos - Today")), title = "Top Videos - Today"))
 	oc.add(DirectoryObject(key = Callback(ParseVideos, pURL='/rankings/weekly-top-videos.html', pTitle=String.Quote("Top Videos - Last 7 days")), title = "Top Videos - Last 7 days"))
 	oc.add(DirectoryObject(key = Callback(ParseVideos, pURL='/rankings/monthly-top-videos.html', pTitle=String.Quote("Top Videos - Last 30 days")), title = "Top Videos - Last 30 days"))
 	oc.add(DirectoryObject(key = Callback(ParseVideos, pURL='/rankings/alltime-top-videos.html', pTitle=String.Quote("Top Videos - All Time")), title = "Top Videos - All Time"))
@@ -28,7 +29,6 @@ def MainMenu():
 	oc.add(DirectoryObject(key = Callback(ParseVideos, pURL='/rankings/monthly-top-viewed.html', pTitle=String.Quote("Most Viewed Videos - Last 30 days")), title = "Most Viewed Videos - Last 30 days"))
 	oc.add(DirectoryObject(key = Callback(ParseVideos, pURL='/rankings/alltime-top-viewed.html', pTitle=String.Quote("Most Viewed Videos - All Time")), title = "Most Viewed Videos - All Time"))
 	oc.add(InputDirectoryObject(key = Callback(Search), title = 'Search Videos', prompt = 'Search Videos'))	
-
 	
 	return oc
 
@@ -133,6 +133,7 @@ def ChannelOptions(pURL,pTitle):
 	# only show this option if it's not HD videos
 	if not channel=="hd_videos":
 		oc.add(DirectoryObject(key = Callback(ParseVideos, pURL='/channels/hd-'+channel+'-1.html', pTitle=String.Quote(pTitle + " - Latest Videos (All)")), title = "Latest Videos (HD Only)"))
+	oc.add(DirectoryObject(key = Callback(ParseVideos, pURL='/channels/top-daily-'+channel+'-1.html', pTitle=String.Quote(pTitle + " - Latest Videos (All)")), title = "Top Videos - Today"))
 	oc.add(DirectoryObject(key = Callback(ParseVideos, pURL='/channels/top-weekly-'+channel+'-1.html', pTitle=String.Quote(pTitle + " - Latest Videos (All)")), title = "Top Videos - Last 7 Days"))
 	oc.add(DirectoryObject(key = Callback(ParseVideos, pURL='/channels/top-monthly-'+channel+'-1.html', pTitle=String.Quote(pTitle + " - Latest Videos (All)")), title = "Top Videos - Last 30 Days"))
 	oc.add(DirectoryObject(key = Callback(ParseVideos, pURL='/channels/top-alltime-'+channel+'-1.html', pTitle=String.Quote(pTitle + " - Latest Videos (All)")), title = "Top Videos - All Time"))
@@ -145,13 +146,5 @@ def ChannelOptions(pURL,pTitle):
 def Search(query="test"):
 	search=String.Quote(query, usePlus=True)
 	return ParseVideos(pURL="/search.php?new=&q=%s&qcat=video" % search, pTitle="Search xHamster")
-
-
-
-
-
-
-
-
 
 
