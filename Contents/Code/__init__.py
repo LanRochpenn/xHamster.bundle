@@ -67,7 +67,7 @@ def ParseVideos(pURL,pTitle):
 
 	try:
 		for video in HTML.ElementFromURL(pURL).xpath('//div[@class="video"]'):
-			title = video.xpath('.//u/@title')[0]
+			title = video.xpath('.//u/text()')[0]
 			url = video.xpath('.//a/@href')[0]
 			thumb = video.xpath('.//img/@src')[0]
 			# no clients display this in regular listings any longer
@@ -82,6 +82,7 @@ def ParseVideos(pURL,pTitle):
 	except:
 		# nothing was found
 		NoResults=""
+		Log.Debug("No Results Found!")
 		
 	# next page object?
  	try:
