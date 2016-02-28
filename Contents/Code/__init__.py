@@ -1,7 +1,7 @@
 PREFIX = '/video/xhamster'
 TITLE = 'xHamster'
 BASE_URL = 'http://xhamster.com'
-CHANNEL_LIST = 'http://xhamster.com/channels.php'
+CHANNEL_LIST = ['http://xhamster.com/channels.php','http://xhamster.com/channels-shemale','http://xhamster.com/channels-gay'];
 CTYPES = ['Straight Categories','Transsexual Categories','Gay Categories']
 ICON='icon-default.png'
 
@@ -99,7 +99,7 @@ def ParseVideos(pURL,pTitle):
 @route(PREFIX + '/GetChannels', c=int)
 def GetChannels(c):
 	oc = ObjectContainer()
-	for channel in HTML.ElementFromURL(CHANNEL_LIST).xpath("//div[contains(@class,'boxC')]//div[contains(@class,'list')][%s]//a[@class='btnBig']" % (c + 1)):
+	for channel in HTML.ElementFromURL(CHANNEL_LIST[c]).xpath("//div[contains(@class,'letter-categories')]//a"):
 		url = channel.xpath("./@href")[0]
 		title = channel.xpath("./text()")[-1].strip()
 		oc.add(DirectoryObject(key = Callback(ChannelOptions, pURL=String.Quote(url), pTitle=String.Quote(title)), title=title))
