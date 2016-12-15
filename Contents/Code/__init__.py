@@ -66,7 +66,7 @@ def ParseVideos(pURL,pTitle):
 		pURL = BASE_URL + pURL.split("xhamster.com")[-1]
 
 	try:
-		for video in HTML.ElementFromURL(pURL).xpath('//div[@class="video"]'):
+		for video in HTML.ElementFromURL(pURL).xpath("//div[contains(@class,'video')]"):
 			title = video.xpath('.//u/text()')[0]
 			url = video.xpath('.//a/@href')[0]
 			thumb = video.xpath('.//img/@src')[0]
